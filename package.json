@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-boilerplate",
+  "name": "fast-food-shop-system-with-nestjs-mongodb-aws-s3",
   "version": "1.2.0",
   "description": "",
   "author": "",
@@ -39,7 +39,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "prepare": "is-ci || husky",
     "release": "release-it"
   },
