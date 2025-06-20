@@ -45,7 +45,7 @@ import { infinityPagination } from '../utils/infinity-pagination';
   version: '1',
 })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @ApiCreatedResponse({
     type: User,
