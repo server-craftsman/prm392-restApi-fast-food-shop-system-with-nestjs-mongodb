@@ -8,7 +8,7 @@ import { Product } from './domain/product';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly productRepository: ProductRepository) { }
+  constructor(private readonly productRepository: ProductRepository) {}
 
   async findManyWithPagination({
     filterOptions,

@@ -22,7 +22,6 @@ import {
   ApiOkResponse,
   ApiParam,
   ApiTags,
-  ApiQuery,
   ApiResponse,
   ApiBody,
   ApiOperation,
@@ -40,18 +39,18 @@ import {
   InfinityPaginationResponseDto,
 } from '../utils/dto/infinity-pagination-response.dto';
 
-
 @ApiTags('Products')
 @Controller({
   path: 'products',
   version: '1',
 })
 export class ProductController {
-  constructor(private readonly productService: ProductService) { }
+  constructor(private readonly productService: ProductService) {}
 
   @Get()
   @ApiOkResponse({
-    description: 'List all products with optional filters, sorting, and pagination',
+    description:
+      'List all products with optional filters, sorting, and pagination',
     type: InfinityPaginationResponse<Product>,
   })
   async findAll(

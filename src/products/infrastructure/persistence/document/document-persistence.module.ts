@@ -5,18 +5,17 @@ import { ProductRepository } from '../product.repository';
 import { ProductsDocumentRepository } from './repositories/products.repository';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: ProductSchemaClass.name, schema: ProductSchema },
-        ]),
-    ],
-    providers: [
-        {
-            provide: ProductRepository,
-            useClass: ProductsDocumentRepository,
-        }
-    ],
-    exports: [ProductRepository],
+  imports: [
+    MongooseModule.forFeature([
+      { name: ProductSchemaClass.name, schema: ProductSchema },
+    ]),
+  ],
+  providers: [
+    {
+      provide: ProductRepository,
+      useClass: ProductsDocumentRepository,
+    },
+  ],
+  exports: [ProductRepository],
 })
-export class DocumentPersistenceModule { }
-
+export class DocumentPersistenceModule {}

@@ -44,9 +44,11 @@ async function bootstrap() {
     .setContact(
       'Huy Nguyen',
       'https://github.com/server-craftsman',
-      'huyit2003@gmail.com'
+      'huyit2003@gmail.com',
     )
-    .setTermsOfService('https://github.com/server-craftsman/restApi-fast-food-shop-system-with-nestjs-mongodb')
+    .setTermsOfService(
+      'https://github.com/server-craftsman/restApi-fast-food-shop-system-with-nestjs-mongodb',
+    )
     .addGlobalParameters({
       in: 'header',
       required: false,
