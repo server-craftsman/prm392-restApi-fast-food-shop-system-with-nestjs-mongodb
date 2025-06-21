@@ -37,10 +37,16 @@ async function bootstrap() {
   );
 
   const options = new DocumentBuilder()
-    .setTitle('API')
+    .setTitle('Fast Food Shop System')
     .setDescription('API docs')
     .setVersion('1.0')
     .addBearerAuth()
+    .setContact(
+      'Huy Nguyen',
+      'https://github.com/server-craftsman',
+      'huyit2003@gmail.com'
+    )
+    .setTermsOfService('https://github.com/server-craftsman/restApi-fast-food-shop-system-with-nestjs-mongodb')
     .addGlobalParameters({
       in: 'header',
       required: false,
@@ -52,12 +58,18 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('docs', app, document);
+
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      filter: true,
+      showRequestDuration: true,
+    },
+    customSiteTitle: `Fast Food Shop System`,
+  });
 
   const port =
     process.env.PORT || configService.get('app.port', { infer: true }) || 3000;
   await app.listen(port, '::');
-  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap().catch((err) => {
   console.error('Error during application bootstrap', err);

@@ -8,56 +8,56 @@ import { IPaginationOptions } from '../utils/types/pagination-options';
 import { FilterCategoryDto, SortCategoryDto } from './dto/query-category.dto';
 
 @Injectable()
-export class CategoryService {
-  constructor(private readonly categoryRepository: CategoryRepository) {}
+export class CategoriesService {
+    constructor(private readonly categoryRepository: CategoryRepository) { }
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const category = await this.categoryRepository.create(
-      createCategoryDto as Category,
-    );
-    return category;
-  }
+    async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+        const category = await this.categoryRepository.create(
+            createCategoryDto as Category,
+        );
+        return category;
+    }
 
-  findManyWithPagination({
-    filterOptions,
-    sortOptions,
-    paginationOptions,
-  }: {
-    filterOptions?: FilterCategoryDto | null;
-    sortOptions?: SortCategoryDto[] | null;
-    paginationOptions: IPaginationOptions;
-  }): Promise<Category[]> {
-    return this.categoryRepository.findManyWithPagination({
-      filterOptions,
-      sortOptions,
-      paginationOptions,
-    });
-  }
+    findManyWithPagination({
+        filterOptions,
+        sortOptions,
+        paginationOptions,
+    }: {
+        filterOptions?: FilterCategoryDto | null;
+        sortOptions?: SortCategoryDto[] | null;
+        paginationOptions: IPaginationOptions;
+    }): Promise<Category[]> {
+        return this.categoryRepository.findManyWithPagination({
+            filterOptions,
+            sortOptions,
+            paginationOptions,
+        });
+    }
 
-  findById(id: Category['id']): Promise<NullableType<Category>> {
-    return this.categoryRepository.findById(id);
-  }
+    findById(id: Category['id']): Promise<NullableType<Category>> {
+        return this.categoryRepository.findById(id);
+    }
 
-  findByIds(ids: Category['id'][]): Promise<Category[]> {
-    return this.categoryRepository.findByIds(ids);
-  }
+    findByIds(ids: Category['id'][]): Promise<Category[]> {
+        return this.categoryRepository.findByIds(ids);
+    }
 
-  findByCategoryName(categoryName: string): Promise<NullableType<Category>> {
-    return this.categoryRepository.findByName(categoryName);
-  }
+    findByCategoryName(categoryName: string): Promise<NullableType<Category>> {
+        return this.categoryRepository.findByName(categoryName);
+    }
 
-  async update(
-    id: string,
-    updateCategoryDto: UpdateCategoryDto,
-  ): Promise<Category> {
-    const category = await this.categoryRepository.update(
-      id,
-      updateCategoryDto as Category,
-    );
-    return category as Category;
-  }
+    async update(
+        id: string,
+        updateCategoryDto: UpdateCategoryDto,
+    ): Promise<Category> {
+        const category = await this.categoryRepository.update(
+            id,
+            updateCategoryDto as Category,
+        );
+        return category as Category;
+    }
 
-  async remove(id: string): Promise<void> {
-    await this.categoryRepository.remove(id);
-  }
+    async remove(id: string): Promise<void> {
+        await this.categoryRepository.remove(id);
+    }
 }

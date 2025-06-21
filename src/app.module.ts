@@ -27,20 +27,21 @@ import { MailerModule } from './mailer/mailer.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseConfigService } from './database/mongoose-config.service';
 import { DatabaseConfig } from './database/config/database-config.type';
-import { CategoryModule } from './categories/categories.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
 
 // <database-block>
 const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
   .isDocumentDatabase
   ? MongooseModule.forRootAsync({
-      useClass: MongooseConfigService,
-    })
+    useClass: MongooseConfigService,
+  })
   : TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        return new DataSource(options).initialize();
-      },
-    });
+    useClass: TypeOrmConfigService,
+    dataSourceFactory: async (options: DataSourceOptions) => {
+      return new DataSource(options).initialize();
+    },
+  });
 // </database-block>
 
 @Module({
@@ -83,7 +84,8 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
-    CategoryModule,
+    ProductsModule,
+    CategoriesModule,
     UsersModule,
     FilesModule,
     AuthModule,
@@ -96,4 +98,4 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
     HomeModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
