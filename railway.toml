@@ -6,3 +6,4 @@ startCommand = "npm run start:prod"
 healthcheckPath = "/"
 healthcheckTimeout = 100
 restartPolicyType = "on_failure"
+numReplicas = 1
