@@ -55,7 +55,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   const port = configService.getOrThrow('app.port', { infer: true });
-  await app.listen(port);
+  await app.listen(port, '::');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap().catch((err) => {
