@@ -1,12 +1,8 @@
 [build]
-builder = "NIXPACKS"
+builder = "nixpacks"
 
 [deploy]
-runtime = "V2"
-numReplicas = 1
 startCommand = "npm run start:prod"
 healthcheckPath = "/"
-sleepApplication = false
-multiRegionConfig = {"asia-southeast1-eqsg3a":{"numReplicas":1}}
-restartPolicyType = "ON_FAILURE"
+restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
