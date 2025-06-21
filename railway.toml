@@ -1,14 +1,10 @@
 [build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+builder = "nixpacks"
 
 [deploy]
-runtime = "V2"
-numReplicas = 1
 startCommand = "npm run start:prod"
 healthcheckPath = "/"
-sleepApplication = false
-restartPolicyType = "ON_FAILURE"
+restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
 [deploy.multiRegionConfig."asia-southeast1-eqsg3a"]
