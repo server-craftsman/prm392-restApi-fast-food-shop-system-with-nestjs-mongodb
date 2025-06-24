@@ -213,26 +213,75 @@ export class PaymentController {
     );
   }
 
+  // @ApiOperation({
+  //   summary: 'Create ZaloPay payment',
+  //   description: 'Initiate a ZaloPay payment for an order',
+  // })
+  // @Post('zalopay')
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
+  // @ApiBearerAuth()
+  // @ApiBody({ type: ZaloPaymentDto })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: 'ZaloPay payment URL created successfully',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       paymentUrl: {
+  //         type: 'string',
+  //         description: 'ZaloPay payment URL',
+  //       },
+  //       payment: {
+  //         $ref: '#/components/schemas/Payment',
+  //       },
+  //     },
+  //   },
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Invalid order or payment already exists',
+  // })
+  // @HttpCode(HttpStatus.CREATED)
+  // async payByZaloPay(
+  //   @Body() zaloPaymentDto: ZaloPaymentDto,
+  //   @Request() req,
+  // ): Promise<{ paymentUrl: string; payment: Payment }> {
+  //   return this.paymentService.payByZaloPay(req.user.id, zaloPaymentDto);
+  // }
+
   @ApiOperation({
-    summary: 'Create ZaloPay payment',
-    description: 'Initiate a ZaloPay payment for an order',
+    summary: 'Create ZaloPay payment for Mobile',
+    description:
+      'Initiate a ZaloPay payment for mobile apps (Android/iOS) - Returns order token for ZaloPay SDK',
   })
-  @Post('zalopay')
+  @Post('zalopay/mobile')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBearerAuth()
   @ApiBody({ type: ZaloPaymentDto })
   @ApiResponse({
     status: 201,
-    description: 'ZaloPay payment URL created successfully',
+    description: 'ZaloPay mobile order created successfully',
     schema: {
       type: 'object',
       properties: {
-        paymentUrl: {
+        orderToken: {
           type: 'string',
-          description: 'ZaloPay payment URL',
+          description: 'ZaloPay order token for mobile SDK',
+        },
+        zpTransToken: {
+          type: 'string',
+          description: 'ZaloPay transaction token',
+        },
+        appTransId: {
+          type: 'string',
+          description: 'Application transaction ID',
         },
         payment: {
           $ref: '#/components/schemas/Payment',
+        },
+        orderData: {
+          type: 'object',
+          description: 'Order data for mobile SDK',
         },
       },
     },
@@ -242,11 +291,17 @@ export class PaymentController {
     description: 'Invalid order or payment already exists',
   })
   @HttpCode(HttpStatus.CREATED)
-  async payByZaloPay(
+  async payByZaloPayMobile(
     @Body() zaloPaymentDto: ZaloPaymentDto,
     @Request() req,
-  ): Promise<{ paymentUrl: string; payment: Payment }> {
-    return this.paymentService.payByZaloPay(req.user.id, zaloPaymentDto);
+  ): Promise<{
+    orderToken: string;
+    zpTransToken: string;
+    appTransId: string;
+    payment: Payment;
+    orderData: any;
+  }> {
+    return this.paymentService.payByZaloPayMobile(req.user.id, zaloPaymentDto);
   }
 
   @ApiOperation({
