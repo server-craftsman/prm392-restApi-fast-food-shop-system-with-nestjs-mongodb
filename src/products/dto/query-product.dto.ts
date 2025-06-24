@@ -4,150 +4,244 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  IsBoolean,
+  IsArray,
 } from 'class-validator';
 import { Transform, Type, plainToInstance } from 'class-transformer';
 import { Product } from '../domain/product';
 
+export class RangeNumberDto {
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  min?: number;
+
+  @ApiPropertyOptional({ example: 100 })
+  @IsOptional()
+  @IsNumber()
+  max?: number;
+}
+
+export class RangeDateDto {
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  @IsOptional()
+  from?: Date;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    example: '2024-12-31T23:59:59.999Z',
+  })
+  @IsOptional()
+  to?: Date;
+}
+
 export class FilterProductDto {
+  @ApiPropertyOptional({ example: 'Bánh tráng' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   name?: string;
 
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'number' },
+      { $ref: '#/components/schemas/RangeNumberDto' },
+    ],
+  })
   @IsOptional()
-  @IsNumber()
-  @ApiPropertyOptional()
-  price?: number;
+  @Type(() => Object)
+  price?: number | RangeNumberDto;
 
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'number' },
+      { $ref: '#/components/schemas/RangeNumberDto' },
+    ],
+  })
+  @IsOptional()
+  @Type(() => Object)
+  quantity?: number | RangeNumberDto;
+
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'number' },
+      { $ref: '#/components/schemas/RangeNumberDto' },
+    ],
+  })
+  @IsOptional()
+  @Type(() => Object)
+  discount?: number | RangeNumberDto;
+
+  @ApiPropertyOptional({ example: 'Ngon tuyệt' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   description?: string;
 
+  @ApiPropertyOptional({ example: '65f1e1c2b1a2c3d4e5f6a7b8' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   categoryId?: string;
 
+  @ApiPropertyOptional({ type: [String], example: ['img1.jpg', 'img2.jpg'] })
   @IsOptional()
-  @ApiPropertyOptional({ type: [Object] })
+  @IsArray()
   images?: any[];
 
+  @ApiPropertyOptional({ example: 'Oreo' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   brand?: string;
 
+  @ApiPropertyOptional({ example: '500g' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   weight?: string;
 
+  @ApiPropertyOptional({ example: 'Bột mì, đường, muối' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   ingredients?: string;
 
+  @ApiPropertyOptional({ example: 'Năng lượng: 100kcal' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   nutritionFacts?: string;
 
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    example: '2024-12-31T23:59:59.999Z',
+  })
   @IsOptional()
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
   expiryDate?: Date;
 
+  @ApiPropertyOptional({ example: 'Việt Nam' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   origin?: string;
 
+  @ApiPropertyOptional({ example: 'Hộp giấy' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   packaging?: string;
 
+  @ApiPropertyOptional({ example: 'Bảo quản nơi khô ráo' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   storageInstructions?: string;
 
+  @ApiPropertyOptional({ example: 'Ăn trực tiếp' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   usageInstructions?: string;
 
+  @ApiPropertyOptional({ example: true })
   @IsOptional()
-  @ApiPropertyOptional()
+  @IsBoolean()
   isVegetarian?: boolean;
 
+  @ApiPropertyOptional({ example: false })
   @IsOptional()
-  @ApiPropertyOptional()
+  @IsBoolean()
   isVegan?: boolean;
 
+  @ApiPropertyOptional({ example: 'Đậu phộng' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   allergens?: string;
 
+  @ApiPropertyOptional({ example: '1 cái' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   servingSize?: string;
 
+  @ApiPropertyOptional({ example: 'Việt Nam' })
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional()
   countryOfManufacture?: string;
 
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'string', format: 'date-time' },
+      { $ref: '#/components/schemas/RangeDateDto' },
+    ],
+  })
   @IsOptional()
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  createdAt?: Date;
+  @Type(() => Object)
+  createdAt?: Date | RangeDateDto;
 
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'string', format: 'date-time' },
+      { $ref: '#/components/schemas/RangeDateDto' },
+    ],
+  })
   @IsOptional()
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
-  updatedAt?: Date;
+  @Type(() => Object)
+  updatedAt?: Date | RangeDateDto;
 
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    example: '2024-12-31T23:59:59.999Z',
+  })
   @IsOptional()
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
   deletedAt?: Date;
 
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'number' },
+      { $ref: '#/components/schemas/RangeNumberDto' },
+    ],
+  })
   @IsOptional()
-  @IsNumber()
-  @ApiPropertyOptional()
-  rating?: number;
+  @Type(() => Object)
+  rating?: number | RangeNumberDto;
 
+  @ApiPropertyOptional({
+    oneOf: [
+      { type: 'number' },
+      { $ref: '#/components/schemas/RangeNumberDto' },
+    ],
+  })
   @IsOptional()
-  @IsNumber()
-  @ApiPropertyOptional()
-  stock?: number;
+  @Type(() => Object)
+  stock?: number | RangeNumberDto;
 }
 
 export class SortProductDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'name' })
   @Type(() => String)
   @IsString()
-  orderBy: keyof Product;
+  field: keyof Product;
 
-  @ApiProperty()
+  @ApiProperty({ example: 'ASC' })
   @IsString()
   order: string;
 }
 
 export class QueryProductDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 1, description: 'Page number' })
   @Transform(({ value }) => (value ? Number(value) : 1))
   @IsNumber()
   @IsOptional()
   page?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 10, description: 'Items per page' })
   @Transform(({ value }) => (value ? Number(value) : 10))
   @IsNumber()
   @IsOptional()
   limit?: number;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({
+    description: 'Filter for product',
+    type: String,
+    example: '{ "name": "Bánh tráng", "price": { "min": 10, "max": 100 } }',
+  })
   @IsOptional()
   @Transform(({ value }) =>
     value ? plainToInstance(FilterProductDto, JSON.parse(value)) : undefined,
@@ -156,7 +250,11 @@ export class QueryProductDto {
   @Type(() => FilterProductDto)
   filters?: FilterProductDto | null;
 
-  @ApiPropertyOptional({ type: String })
+  @ApiPropertyOptional({
+    description: 'Sort for product',
+    type: String,
+    example: '[{ "field": "name", "order": "ASC" }]',
+  })
   @IsOptional()
   @Transform(({ value }) => {
     return value

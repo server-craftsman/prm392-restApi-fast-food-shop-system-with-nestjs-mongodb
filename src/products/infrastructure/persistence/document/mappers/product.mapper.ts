@@ -10,6 +10,8 @@ export class ProductMapper {
     domainEntity.name = raw.name;
     domainEntity.description = raw.description;
     domainEntity.price = raw.price;
+    domainEntity.quantity = raw.quantity;
+    domainEntity.discount = raw.discount;
     domainEntity.categoryId = raw.categoryId?.toString();
 
     domainEntity.images =
@@ -46,6 +48,8 @@ export class ProductMapper {
     persistenceEntity.name = domainEntity.name;
     persistenceEntity.description = domainEntity.description || '';
     persistenceEntity.price = domainEntity.price;
+    persistenceEntity.quantity = domainEntity.quantity || 0;
+    persistenceEntity.discount = domainEntity.discount || 0;
     persistenceEntity.categoryId = new Types.ObjectId(domainEntity.categoryId);
 
     persistenceEntity.images =

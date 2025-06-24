@@ -5,7 +5,7 @@ import { FileSchemaClass } from '../../../../../files/infrastructure/persistence
 import { EntityDocumentHelper } from '../../../../../utils/document-entity-helper';
 
 export type ProductSchemaDocument = HydratedDocument<ProductSchemaClass>;
-
+import { COLLECTION_PATH } from '../../../../../utils/collection.path';
 @Schema({
   timestamps: true,
   toJSON: {
@@ -23,7 +23,13 @@ export class ProductSchemaClass extends EntityDocumentHelper {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
+  @Prop({ required: true })
+  quantity: number;
+
+  @Prop()
+  discount: number;
+
+  @Prop({ type: Types.ObjectId, ref: COLLECTION_PATH.CATEGORY, required: true })
   categoryId: Types.ObjectId;
 
   @Prop({

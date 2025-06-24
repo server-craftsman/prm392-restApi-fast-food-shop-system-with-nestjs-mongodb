@@ -39,10 +39,20 @@ export class CategoryDocumentRepository implements CategoryRepository {
     const categoryObjects = await this.categoryModel
       .find(where)
       .sort(
-        sortOptions?.reduce((acc, sortOption) => {
-          acc[sortOption?.field || 'createdAt'] = sortOption.order;
-          return acc;
-        }, {} as any) || { createdAt: -1 },
+        (sortOptions ?? []).reduce(
+          (accumulator, sortOption) => {
+            const field =
+              (sortOption?.field ?? 'createdAt') === 'id'
+                ? '_id'
+                : (sortOption?.field ?? 'createdAt');
+            const order =
+              (sortOption?.order ?? 'DESC').toString().toUpperCase() === 'ASC'
+                ? 1
+                : -1;
+            return { ...accumulator, [field]: order };
+          },
+          {} as Record<string, 1 | -1>,
+        ) || { createdAt: -1 },
       )
       .select('-__v')
       .lean()

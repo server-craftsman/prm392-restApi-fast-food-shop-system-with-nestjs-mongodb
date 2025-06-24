@@ -29,6 +29,8 @@ import { MongooseConfigService } from './database/mongoose-config.service';
 import { DatabaseConfig } from './database/config/database-config.type';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
+import { CartItemsModule } from './cart-items/cart-items.module';
+import { OrderModule } from './order/orders.module';
 
 // <database-block>
 const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
@@ -84,6 +86,8 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
+    OrderModule,
+    CartItemsModule,
     ProductsModule,
     CategoriesModule,
     UsersModule,

@@ -44,21 +44,36 @@ export class QueryCategoryDto {
     type: String,
   })
   @IsOptional()
-  @Transform(({ value }) =>
-    value ? plainToInstance(FilterCategoryDto, JSON.parse(value)) : undefined,
-  )
+  @Transform(({ value }) => {
+    if (!value) return undefined;
+    try {
+      return plainToInstance(FilterCategoryDto, JSON.parse(value));
+    } catch {
+      return undefined;
+    }
+  })
   @ValidateNested()
   @Type(() => FilterCategoryDto)
+  @ApiPropertyOptional({
+    type: String,
+    example: '{   "name": "Coi Mọi GAY Da Đen"  }',
+  })
   filters?: FilterCategoryDto | null;
 
   @ApiPropertyOptional({
     description: 'Sort for category',
+    example: '[{ "field": "name", "order": "ASC" }]',
     type: String,
   })
   @IsOptional()
-  @Transform(({ value }) =>
-    value ? plainToInstance(SortCategoryDto, JSON.parse(value)) : undefined,
-  )
+  @Transform(({ value }) => {
+    if (!value) return undefined;
+    try {
+      return plainToInstance(SortCategoryDto, JSON.parse(value));
+    } catch {
+      return undefined;
+    }
+  })
   @ValidateNested({ each: true })
   @Type(() => SortCategoryDto)
   sort?: SortCategoryDto[] | null;

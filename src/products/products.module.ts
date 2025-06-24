@@ -8,6 +8,6 @@ import { DocumentPersistenceModule } from './infrastructure/persistence/document
   imports: [DocumentPersistenceModule, FilesModule],
   controllers: [ProductController],
   providers: [ProductService],
-  exports: [ProductService],
+  exports: [ProductService, DocumentPersistenceModule],
 })
 export class ProductsModule {}

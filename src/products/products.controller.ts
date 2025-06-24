@@ -144,4 +144,102 @@ export class ProductController {
   async delete(@Param('id') id: string): Promise<void> {
     await this.productService.delete(id);
   }
+
+  @ApiOperation({
+    summary: 'Delete all products in a category',
+    description: 'Delete all products in a category by its ID',
+  })
+  @Delete('category/:categoryId')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.admin)
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: 'Delete all products in a category by its ID',
+    type: undefined,
+  })
+  @ApiParam({ name: 'categoryId', description: 'Category ID' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async removeByCategoryId(@Param('categoryId') categoryId: string) {
+    await this.productService.removeByCategoryId(categoryId);
+  }
+
+  @ApiOperation({
+    summary: 'Get products by category ID',
+    description: 'Get all products that belong to a specific category',
+  })
+  @Get('category/:categoryId')
+  @ApiOkResponse({
+    description: 'Get products by category ID',
+    type: [Product],
+  })
+  @ApiParam({ name: 'categoryId', description: 'Category ID' })
+  @ApiResponse({
+    status: 404,
+    description: 'No products found for this category',
+  })
+  @HttpCode(HttpStatus.OK)
+  async findByCategoryId(
+    @Param('categoryId') categoryId: string,
+  ): Promise<Product[]> {
+    return this.productService.findByCategoryId(categoryId);
+  }
+
+  @ApiOperation({
+    summary: 'Update category for products',
+    description:
+      'Update category for products by old category ID and new category ID',
+  })
+  @Patch('category/:oldCategoryId/:newCategoryId')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleEnum.admin)
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description:
+      'Update category for products by old category ID and new category ID',
+    type: undefined,
+  })
+  @ApiParam({ name: 'oldCategoryId', description: 'Old Category ID' })
+  @ApiParam({ name: 'newCategoryId', description: 'New Category ID' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateCategoryForProducts(
+    @Param('oldCategoryId') oldCategoryId: string,
+    @Param('newCategoryId') newCategoryId: string,
+  ) {
+    await this.productService.updateCategoryForProducts(
+      oldCategoryId,
+      newCategoryId,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Find products by category name',
+    description: 'Find products by category name',
+  })
+  @Get('category/name/:categoryName')
+  @ApiOkResponse({
+    description: 'Find products by category name',
+    type: Product,
+  })
+  @ApiParam({ name: 'categoryName', description: 'Category name' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  @HttpCode(HttpStatus.OK)
+  async findByCategoryName(@Param('categoryName') categoryName: string) {
+    return this.productService.findByCategoryName(categoryName);
+  }
+
+  // @ApiOperation({
+  //   summary: 'Find all categories that have at least one product',
+  //   description: 'Find all categories that have at least one product',
+  // })
+  // @Get('categories')
+  // @ApiOkResponse({
+  //   description: 'Find all categories that have at least one product',
+  //   type: String,
+  // })
+  // @HttpCode(HttpStatus.OK)
+  // async findCategoriesWithProducts() {
+  //   return this.productService.findCategoriesWithProducts();
+  // }
 }

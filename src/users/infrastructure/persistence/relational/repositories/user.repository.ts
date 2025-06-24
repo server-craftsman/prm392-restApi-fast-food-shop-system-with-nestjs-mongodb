@@ -48,7 +48,7 @@ export class UsersRelationalRepository implements UserRepository {
       order: sortOptions?.reduce(
         (accumulator, sort) => ({
           ...accumulator,
-          [sort.orderBy]: sort.order,
+          [sort.field]: sort.order,
         }),
         {},
       ),

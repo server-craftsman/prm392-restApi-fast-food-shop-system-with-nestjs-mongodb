@@ -22,6 +22,12 @@ export class Product {
   @ApiProperty({ type: Number })
   price: number;
 
+  @ApiProperty({ type: Number })
+  quantity: number | undefined;
+
+  @ApiProperty({ type: Number })
+  discount?: number | undefined;
+
   @ApiProperty({ type: String })
   categoryId: string;
 

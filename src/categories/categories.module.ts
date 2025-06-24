@@ -8,7 +8,6 @@ import {
   CategorySchemaClass,
   CategorySchema,
 } from './infrastructure/persistence/document/entities/categories.schema';
-
 @Module({
   imports: [
     MongooseModule.forFeature([

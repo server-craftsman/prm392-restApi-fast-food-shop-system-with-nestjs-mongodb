@@ -21,7 +21,7 @@ export class SortUserDto {
   @ApiProperty()
   @Type(() => String)
   @IsString()
-  orderBy: keyof User;
+  field: keyof User;
 
   @ApiProperty()
   @IsString()
@@ -48,6 +48,10 @@ export class QueryUserDto {
   )
   @ValidateNested()
   @Type(() => FilterUserDto)
+  @ApiPropertyOptional({
+    type: String,
+    example: '{     "roles": [       { "id": 1 }     ]   }',
+  })
   filters?: FilterUserDto | null;
 
   @ApiPropertyOptional({ type: String })
@@ -57,5 +61,9 @@ export class QueryUserDto {
   })
   @ValidateNested({ each: true })
   @Type(() => SortUserDto)
+  @ApiPropertyOptional({
+    type: String,
+    example: '[{ "field": "firstName", "order": "ASC" }]',
+  })
   sort?: SortUserDto[] | null;
 }

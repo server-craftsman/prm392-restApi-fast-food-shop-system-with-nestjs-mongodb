@@ -46,7 +46,7 @@ export class UsersDocumentRepository implements UserRepository {
         sortOptions?.reduce(
           (accumulator, sort) => ({
             ...accumulator,
-            [sort.orderBy === 'id' ? '_id' : sort.orderBy]:
+            [sort.field === 'id' ? '_id' : sort.field]:
               sort.order.toUpperCase() === 'ASC' ? 1 : -1,
           }),
           {},

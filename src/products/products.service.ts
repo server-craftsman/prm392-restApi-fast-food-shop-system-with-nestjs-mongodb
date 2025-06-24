@@ -45,4 +45,41 @@ export class ProductService {
   async delete(id: string) {
     await this.productRepository.remove(id);
   }
+
+  async removeByCategoryId(categoryId: string) {
+    await this.productRepository.removeByCategoryId(categoryId);
+  }
+
+  async updateCategoryForProducts(
+    oldCategoryId: string,
+    newCategoryId: string,
+  ) {
+    await this.productRepository.updateCategoryForProducts(
+      oldCategoryId,
+      newCategoryId,
+    );
+  }
+
+  async findByCategoryName(categoryName: string) {
+    const products =
+      await this.productRepository.findByCategoryName(categoryName);
+    if (!products || products.length === 0)
+      throw new NotFoundException('Category or products not found');
+    return products;
+  }
+
+  async findCategoriesWithProducts() {
+    const categories =
+      await this.productRepository.findCategoriesWithProducts();
+    if (!categories || categories.length === 0)
+      throw new NotFoundException('No categories with products found');
+    return categories;
+  }
+
+  async findByCategoryId(categoryId: string) {
+    const products = await this.productRepository.findByCategoryId(categoryId);
+    if (!products || products.length === 0)
+      throw new NotFoundException('No products found for this category');
+    return products;
+  }
 }
