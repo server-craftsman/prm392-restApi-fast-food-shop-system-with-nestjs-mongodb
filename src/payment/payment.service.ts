@@ -5,9 +5,8 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { PaymentSchemaClass } from './domain/payment';
+import { Payment } from './domain/payment';
+import { PaymentRepository } from './infrastructure/persistence/payment.repository';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ZaloPaymentDto } from './dto/zalopay-payment.dto';
 import { PaymentCallbackDto } from './dto/payment-callback.dto';
@@ -18,10 +17,9 @@ import * as crypto from 'crypto';
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectModel(PaymentSchemaClass.name)
-    private paymentModel: Model<PaymentSchemaClass>,
+    private readonly paymentRepository: PaymentRepository,
     @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
-  ) {}
+  ) { }
 
   // ZaloPay configuration (should be in environment variables)
   private readonly zaloPayConfig = {
@@ -32,56 +30,33 @@ export class PaymentService {
       process.env.ZALOPAY_ENDPOINT || 'https://sb-openapi.zalopay.vn/v2/create',
   };
 
-  async findAll(): Promise<PaymentSchemaClass[]> {
-    return this.paymentModel.find().lean().exec();
+  async findAll(): Promise<Payment[]> {
+    return this.paymentRepository.findAll();
   }
 
-  async findOne(id: string): Promise<PaymentSchemaClass> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid payment ID');
-    }
-    const payment = await this.paymentModel.findById(id).lean().exec();
+  async findOne(id: string): Promise<Payment> {
+    const payment = await this.paymentRepository.findById(id);
     if (!payment) throw new NotFoundException('Payment not found');
-    return payment as PaymentSchemaClass;
+    return payment;
   }
 
-  async findByOrderId(orderId: string): Promise<PaymentSchemaClass[]> {
-    if (!Types.ObjectId.isValid(orderId)) {
-      throw new BadRequestException('Invalid order ID');
-    }
-    return this.paymentModel
-      .find({ orderId: new Types.ObjectId(orderId) })
-      .lean()
-      .exec();
+  async findByOrderId(orderId: string): Promise<Payment[]> {
+    return this.paymentRepository.findByOrderId(orderId);
   }
 
-  async findByUserId(userId: string): Promise<PaymentSchemaClass[]> {
-    if (!Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid user ID');
-    }
-    return this.paymentModel
-      .find({ userId: new Types.ObjectId(userId) })
-      .lean()
-      .exec();
+  async findByUserId(userId: string): Promise<Payment[]> {
+    return this.paymentRepository.findByUserId(userId);
   }
 
   async createPayment(
     userId: string,
     data: CreatePaymentDto,
-  ): Promise<PaymentSchemaClass> {
-    // Validate order and user IDs
-    if (
-      !Types.ObjectId.isValid(data.orderId) ||
-      !Types.ObjectId.isValid(userId)
-    ) {
-      throw new BadRequestException('Invalid order ID or user ID');
-    }
-
+  ): Promise<Payment> {
     // Check if payment already exists for this order
-    const existingPayment = await this.paymentModel.findOne({
-      orderId: new Types.ObjectId(data.orderId),
-      status: { $in: [PaymentStatus.PAID, PaymentStatus.PENDING] },
-    });
+    const existingPayments = await this.paymentRepository.findByOrderId(data.orderId);
+    const existingPayment = existingPayments.find(
+      payment => payment.status === PaymentStatus.PAID || payment.status === PaymentStatus.PENDING
+    );
 
     if (existingPayment) {
       throw new BadRequestException('Payment already exists for this order');
@@ -91,8 +66,8 @@ export class PaymentService {
     const transactionId = this.generateTransactionId();
 
     const paymentData = {
-      orderId: new Types.ObjectId(data.orderId),
-      userId: new Types.ObjectId(userId),
+      orderId: data.orderId,
+      userId: userId,
       amount: data.amount,
       paymentMethod: data.paymentMethod,
       transactionId,
@@ -100,15 +75,14 @@ export class PaymentService {
       description: data.description,
     };
 
-    const created = new this.paymentModel(paymentData);
-    return created.save();
+    return this.paymentRepository.create(paymentData);
   }
 
   async payByCash(
     userId: string,
     orderId: string,
     description?: string,
-  ): Promise<PaymentSchemaClass> {
+  ): Promise<Payment> {
     // check orderId has the same userId
     const order = await this.orderService.findOne(orderId);
     if (order.userId.toString() !== userId) {
@@ -116,10 +90,10 @@ export class PaymentService {
     }
 
     // Check if order is already paid
-    const existingPayment = await this.paymentModel.findOne({
-      orderId: new Types.ObjectId(orderId),
-      status: PaymentStatus.PAID,
-    });
+    const existingPayments = await this.paymentRepository.findByOrderId(orderId);
+    const existingPayment = existingPayments.find(
+      payment => payment.status === PaymentStatus.PAID
+    );
 
     if (existingPayment) {
       throw new BadRequestException('Order already paid');
@@ -138,13 +112,13 @@ export class PaymentService {
     const payment = await this.createPayment(userId, paymentData);
 
     // For cash payments, mark as paid immediately
-    return this.updatePaymentStatus(payment._id.toString(), PaymentStatus.PAID);
+    return this.updatePaymentStatus(payment.id, PaymentStatus.PAID);
   }
 
   async payByZaloPay(
     userId: string,
     data: ZaloPaymentDto,
-  ): Promise<{ paymentUrl: string; payment: PaymentSchemaClass }> {
+  ): Promise<{ paymentUrl: string; payment: Payment }> {
     // Get order amount
     const amount = await this.getOrderAmount(data.orderId);
 
@@ -162,23 +136,22 @@ export class PaymentService {
     const zaloPayOrder = await this.createZaloPayOrder(payment, data.returnUrl);
 
     // Update payment with ZaloPay details
-    payment.paymentUrl = zaloPayOrder.orderUrl;
-    payment.zaloPayOrderId = zaloPayOrder.orderId;
-    await payment.save();
+    const updatedPayment = await this.paymentRepository.update(payment.id, {
+      paymentUrl: zaloPayOrder.orderUrl,
+      zaloPayOrderId: zaloPayOrder.orderId,
+    });
 
     return {
       paymentUrl: zaloPayOrder.orderUrl,
-      payment,
+      payment: updatedPayment || payment,
     };
   }
 
   async handleZaloPayCallback(
     data: PaymentCallbackDto,
-  ): Promise<PaymentSchemaClass> {
+  ): Promise<Payment> {
     // Find payment by ZaloPay order ID
-    const payment = await this.paymentModel.findOne({
-      zaloPayOrderId: data.orderId,
-    });
+    const payment = await this.paymentRepository.findByZaloPayOrderId(data.orderId);
 
     if (!payment) {
       throw new NotFoundException('Payment not found');
@@ -187,39 +160,34 @@ export class PaymentService {
     // Update payment status based on ZaloPay response
     const newStatus =
       data.status === 1 ? PaymentStatus.PAID : PaymentStatus.FAILED;
-    payment.status = newStatus;
-    payment.transactionId = data.transactionId;
 
-    return payment.save();
+    const updatedPayment = await this.paymentRepository.update(payment.id, {
+      status: newStatus,
+      transactionId: data.transactionId,
+    });
+
+    return updatedPayment || payment;
   }
 
   async updatePaymentStatus(
     paymentId: string,
     status: PaymentStatus,
-  ): Promise<PaymentSchemaClass> {
-    if (!Types.ObjectId.isValid(paymentId)) {
-      throw new BadRequestException('Invalid payment ID');
-    }
+  ): Promise<Payment> {
+    const updatedPayment = await this.paymentRepository.update(paymentId, { status });
 
-    const payment = await this.paymentModel.findByIdAndUpdate(
-      paymentId,
-      { status },
-      { new: true },
-    );
-
-    if (!payment) {
+    if (!updatedPayment) {
       throw new NotFoundException('Payment not found');
     }
 
-    return payment;
+    return updatedPayment;
   }
 
-  async cancelPayment(paymentId: string): Promise<PaymentSchemaClass> {
+  async cancelPayment(paymentId: string): Promise<Payment> {
     return this.updatePaymentStatus(paymentId, PaymentStatus.CANCELLED);
   }
 
   private createZaloPayOrder(
-    payment: PaymentSchemaClass,
+    payment: Payment,
     returnUrl?: string,
   ): Promise<{ orderUrl: string; orderId: string }> {
     const embedData = JSON.stringify({

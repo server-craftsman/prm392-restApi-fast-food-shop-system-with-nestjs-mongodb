@@ -25,7 +25,7 @@ import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { RolesGuard } from '../roles/roles.guard';
 
-@ApiTags('Cart')
+@ApiTags('Carts')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller({
@@ -33,7 +33,7 @@ import { RolesGuard } from '../roles/roles.guard';
   version: '1',
 })
 export class CartItemsController {
-  constructor(private readonly cartItemsService: CartItemsService) {}
+  constructor(private readonly cartItemsService: CartItemsService) { }
 
   @Get('/me')
   @ApiOperation({ summary: 'Get cart' })

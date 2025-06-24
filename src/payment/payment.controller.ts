@@ -26,16 +26,16 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { PaymentSchemaClass } from './domain/payment';
+import { Payment } from './domain/payment';
 import { PaymentStatus } from './payment-enum';
 
-@ApiTags('Payment')
+@ApiTags('Payments')
 @Controller({
-  path: 'payment',
+  path: 'payments',
   version: '1',
 })
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
   @ApiOperation({
     summary: 'Get all payments (Admin only)',
@@ -48,10 +48,10 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'List of all payments',
-    type: [PaymentSchemaClass],
+    type: [Payment],
   })
   @HttpCode(HttpStatus.OK)
-  async getAllPayments(): Promise<PaymentSchemaClass[]> {
+  async getAllPayments(): Promise<Payment[]> {
     return this.paymentService.findAll();
   }
 
@@ -66,11 +66,11 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Payment details',
-    type: PaymentSchemaClass,
+    type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   @HttpCode(HttpStatus.OK)
-  async getPayment(@Param('id') id: string): Promise<PaymentSchemaClass> {
+  async getPayment(@Param('id') id: string): Promise<Payment> {
     return this.paymentService.findOne(id);
   }
 
@@ -85,12 +85,12 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Payments for the order',
-    type: [PaymentSchemaClass],
+    type: [Payment],
   })
   @HttpCode(HttpStatus.OK)
   async getPaymentsByOrder(
     @Param('orderId') orderId: string,
-  ): Promise<PaymentSchemaClass[]> {
+  ): Promise<Payment[]> {
     return this.paymentService.findByOrderId(orderId);
   }
 
@@ -98,16 +98,16 @@ export class PaymentController {
     summary: 'Get my payments',
     description: 'Retrieve all payments made by the authenticated user',
   })
-  @Get('my/payments')
+  @Get('me')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
     description: 'User payments',
-    type: [PaymentSchemaClass],
+    type: [Payment],
   })
   @HttpCode(HttpStatus.OK)
-  async getMyPayments(@Request() req): Promise<PaymentSchemaClass[]> {
+  async getMyPayments(@Request() req): Promise<Payment[]> {
     return this.paymentService.findByUserId(req.user.id);
   }
 
@@ -133,7 +133,7 @@ export class PaymentController {
   @ApiResponse({
     status: 201,
     description: 'Cash payment processed successfully',
-    type: PaymentSchemaClass,
+    type: Payment,
   })
   @ApiResponse({
     status: 400,
@@ -144,7 +144,7 @@ export class PaymentController {
     @Param('orderId') orderId: string,
     @Body() body: { description?: string },
     @Request() req,
-  ): Promise<PaymentSchemaClass> {
+  ): Promise<Payment> {
     return this.paymentService.payByCash(
       req.user.id,
       orderId,
@@ -184,7 +184,7 @@ export class PaymentController {
   async payByZaloPay(
     @Body() zaloPaymentDto: ZaloPaymentDto,
     @Request() req,
-  ): Promise<{ paymentUrl: string; payment: PaymentSchemaClass }> {
+  ): Promise<{ paymentUrl: string; payment: Payment }> {
     return this.paymentService.payByZaloPay(req.user.id, zaloPaymentDto);
   }
 
@@ -197,13 +197,13 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Callback processed successfully',
-    type: PaymentSchemaClass,
+    type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   @HttpCode(HttpStatus.OK)
   async handleZaloPayCallback(
     @Body() callbackDto: PaymentCallbackDto,
-  ): Promise<PaymentSchemaClass> {
+  ): Promise<Payment> {
     return this.paymentService.handleZaloPayCallback(callbackDto);
   }
 
@@ -231,14 +231,14 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Payment status updated successfully',
-    type: PaymentSchemaClass,
+    type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   @HttpCode(HttpStatus.OK)
   async updatePaymentStatus(
     @Param('id') id: string,
     @Body() body: { status: PaymentStatus },
-  ): Promise<PaymentSchemaClass> {
+  ): Promise<Payment> {
     return this.paymentService.updatePaymentStatus(id, body.status);
   }
 
@@ -253,11 +253,11 @@ export class PaymentController {
   @ApiResponse({
     status: 200,
     description: 'Payment cancelled successfully',
-    type: PaymentSchemaClass,
+    type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   @HttpCode(HttpStatus.OK)
-  async cancelPayment(@Param('id') id: string): Promise<PaymentSchemaClass> {
+  async cancelPayment(@Param('id') id: string): Promise<Payment> {
     return this.paymentService.cancelPayment(id);
   }
 }
