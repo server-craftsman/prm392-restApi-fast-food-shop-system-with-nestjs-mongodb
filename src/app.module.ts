@@ -31,6 +31,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrderModule } from './order/orders.module';
+import { PaymentModule } from './payment/payment.module';
 
 // <database-block>
 const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
@@ -86,6 +87,7 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
+    PaymentModule,
     OrderModule,
     CartItemsModule,
     ProductsModule,
