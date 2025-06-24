@@ -2,10 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { CartRepository } from './infrastructure/persistence/cart.repository';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { FilterCartDto, SortCartDto } from './dto/query-cart.dto';
+import { IPaginationOptions } from '../utils/types/pagination-options';
 
 @Injectable()
 export class CartItemsService {
   constructor(private readonly cartRepository: CartRepository) {}
+
+  async findAll() {
+    return this.cartRepository.findAll();
+  }
+
+  async findManyWithPagination({
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    filterOptions?: FilterCartDto | null;
+    sortOptions?: SortCartDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }) {
+    return this.cartRepository.findManyWithPagination({
+      filterOptions,
+      sortOptions,
+      paginationOptions,
+    });
+  }
 
   async getCart(userId: string) {
     let cart = await this.cartRepository.findByUserId(userId);
@@ -14,6 +36,44 @@ export class CartItemsService {
       cart = await this.cartRepository.create(userId);
     }
     return cart;
+  }
+
+  async getMyCartWithPagination({
+    userId,
+    paginationOptions,
+  }: {
+    userId: string;
+    paginationOptions: IPaginationOptions;
+  }) {
+    // For cart items, we need to implement pagination on the cart items
+    // Since each user has one cart, we get the cart and then paginate the items
+    const cart = await this.cartRepository.findByUserId(userId);
+    if (!cart) {
+      // Create empty cart if it doesn't exist
+      const newCart = await this.cartRepository.create(userId);
+      return {
+        cart: newCart,
+        hasNextPage: false,
+        totalItems: 0,
+      };
+    }
+
+    const { page, limit } = paginationOptions;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+
+    const totalItems = cart.items?.length || 0;
+    const paginatedItems = cart.items?.slice(startIndex, endIndex) || [];
+    const hasNextPage = endIndex < totalItems;
+
+    return {
+      cart: {
+        ...cart,
+        items: paginatedItems,
+      },
+      hasNextPage,
+      totalItems,
+    };
   }
 
   async getCartById(cartId: string) {

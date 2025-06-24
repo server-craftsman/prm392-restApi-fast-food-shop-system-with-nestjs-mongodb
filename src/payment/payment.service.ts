@@ -12,6 +12,8 @@ import { ZaloPaymentDto } from './dto/zalopay-payment.dto';
 import { PaymentCallbackDto } from './dto/payment-callback.dto';
 import { PaymentStatus, PaymentMethod } from './payment-enum';
 import { OrderService } from '../order/orders.service';
+import { FilterPaymentDto, SortPaymentDto } from './dto/query-payment.dto';
+import { IPaginationOptions } from '../utils/types/pagination-options';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -19,7 +21,7 @@ export class PaymentService {
   constructor(
     private readonly paymentRepository: PaymentRepository,
     @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
-  ) { }
+  ) {}
 
   // ZaloPay configuration (should be in environment variables)
   private readonly zaloPayConfig = {
@@ -32,6 +34,22 @@ export class PaymentService {
 
   async findAll(): Promise<Payment[]> {
     return this.paymentRepository.findAll();
+  }
+
+  async findManyWithPagination({
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    filterOptions?: FilterPaymentDto | null;
+    sortOptions?: SortPaymentDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }): Promise<Payment[]> {
+    return this.paymentRepository.findManyWithPagination({
+      filterOptions,
+      sortOptions,
+      paginationOptions,
+    });
   }
 
   async findOne(id: string): Promise<Payment> {
@@ -48,14 +66,42 @@ export class PaymentService {
     return this.paymentRepository.findByUserId(userId);
   }
 
+  async findByUserIdWithPagination({
+    userId,
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    userId: string;
+    filterOptions?: FilterPaymentDto | null;
+    sortOptions?: SortPaymentDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }): Promise<Payment[]> {
+    // Set userId filter to ensure only user's payments are returned
+    const userFilterOptions = {
+      ...filterOptions,
+      userId,
+    };
+
+    return this.paymentRepository.findManyWithPagination({
+      filterOptions: userFilterOptions,
+      sortOptions,
+      paginationOptions,
+    });
+  }
+
   async createPayment(
     userId: string,
     data: CreatePaymentDto,
   ): Promise<Payment> {
     // Check if payment already exists for this order
-    const existingPayments = await this.paymentRepository.findByOrderId(data.orderId);
+    const existingPayments = await this.paymentRepository.findByOrderId(
+      data.orderId,
+    );
     const existingPayment = existingPayments.find(
-      payment => payment.status === PaymentStatus.PAID || payment.status === PaymentStatus.PENDING
+      (payment) =>
+        payment.status === PaymentStatus.PAID ||
+        payment.status === PaymentStatus.PENDING,
     );
 
     if (existingPayment) {
@@ -90,9 +136,10 @@ export class PaymentService {
     }
 
     // Check if order is already paid
-    const existingPayments = await this.paymentRepository.findByOrderId(orderId);
+    const existingPayments =
+      await this.paymentRepository.findByOrderId(orderId);
     const existingPayment = existingPayments.find(
-      payment => payment.status === PaymentStatus.PAID
+      (payment) => payment.status === PaymentStatus.PAID,
     );
 
     if (existingPayment) {
@@ -147,11 +194,11 @@ export class PaymentService {
     };
   }
 
-  async handleZaloPayCallback(
-    data: PaymentCallbackDto,
-  ): Promise<Payment> {
+  async handleZaloPayCallback(data: PaymentCallbackDto): Promise<Payment> {
     // Find payment by ZaloPay order ID
-    const payment = await this.paymentRepository.findByZaloPayOrderId(data.orderId);
+    const payment = await this.paymentRepository.findByZaloPayOrderId(
+      data.orderId,
+    );
 
     if (!payment) {
       throw new NotFoundException('Payment not found');
@@ -173,7 +220,9 @@ export class PaymentService {
     paymentId: string,
     status: PaymentStatus,
   ): Promise<Payment> {
-    const updatedPayment = await this.paymentRepository.update(paymentId, { status });
+    const updatedPayment = await this.paymentRepository.update(paymentId, {
+      status,
+    });
 
     if (!updatedPayment) {
       throw new NotFoundException('Payment not found');

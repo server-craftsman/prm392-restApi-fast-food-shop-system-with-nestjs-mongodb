@@ -1,29 +1,49 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
+  IsEnum,
+  IsDateString,
 } from 'class-validator';
 import { Transform, Type, plainToInstance } from 'class-transformer';
 
 export class FilterCategoryDto {
-  @ApiPropertyOptional({ description: 'Name of category' })
+  @ApiPropertyOptional({
+    description: 'Name of category (case insensitive search)',
+  })
   @IsOptional()
   @IsString()
   name?: string | null;
+
+  @ApiPropertyOptional({ description: 'Filter by creation date (ISO string)' })
+  @IsOptional()
+  @IsDateString()
+  createdAt?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by update date (ISO string)' })
+  @IsOptional()
+  @IsDateString()
+  updatedAt?: string;
 }
 
 export class SortCategoryDto {
-  @ApiPropertyOptional({ description: 'Sort by field' })
-  @IsOptional()
+  @ApiProperty({
+    description: 'Field to sort by',
+    enum: ['id', 'name', 'createdAt', 'updatedAt'],
+  })
   @IsString()
-  field?: string;
+  @IsEnum(['id', 'name', 'createdAt', 'updatedAt'])
+  field: string;
 
-  @ApiPropertyOptional({ description: 'Sort order' })
-  @IsOptional()
+  @ApiProperty({
+    description: 'Sort order',
+    enum: ['ASC', 'DESC'],
+  })
   @IsString()
-  order?: string;
+  @IsEnum(['ASC', 'DESC'])
+  order: 'ASC' | 'DESC';
 }
 
 export class QueryCategoryDto {
@@ -56,20 +76,23 @@ export class QueryCategoryDto {
   @Type(() => FilterCategoryDto)
   @ApiPropertyOptional({
     type: String,
-    example: '{   "name": "Coi Mọi GAY Da Đen"  }',
+    example: '{"name": "Electronics"}',
   })
   filters?: FilterCategoryDto | null;
 
   @ApiPropertyOptional({
     description: 'Sort for category',
-    example: '[{ "field": "name", "order": "ASC" }]',
+    example: '[{"field": "name", "order": "ASC"}]',
     type: String,
   })
   @IsOptional()
   @Transform(({ value }) => {
     if (!value) return undefined;
     try {
-      return plainToInstance(SortCategoryDto, JSON.parse(value));
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed)
+        ? parsed.map((item) => plainToInstance(SortCategoryDto, item))
+        : [plainToInstance(SortCategoryDto, parsed)];
     } catch {
       return undefined;
     }

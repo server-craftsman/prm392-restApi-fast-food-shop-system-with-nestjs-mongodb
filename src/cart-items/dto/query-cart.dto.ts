@@ -4,33 +4,22 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-  IsEnum,
-  IsArray,
   IsMongoId,
+  IsBoolean,
 } from 'class-validator';
 import { Transform, Type, plainToInstance } from 'class-transformer';
-import { OrderStatus } from '../order-status.enum';
+import { Cart } from '../domain/cart';
 
-export class FilterOrderDto {
+export class FilterCartDto {
   @ApiPropertyOptional({ description: 'Filter by user ID' })
   @IsOptional()
   @IsMongoId()
   userId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by cart ID' })
+  @ApiPropertyOptional({ description: 'Filter by product ID in cart items' })
   @IsOptional()
   @IsMongoId()
-  cartId?: string;
-
-  @ApiPropertyOptional({
-    enum: OrderStatus,
-    isArray: true,
-    description: 'Filter by order statuses',
-  })
-  @IsOptional()
-  @IsArray()
-  @IsEnum(OrderStatus, { each: true })
-  statuses?: OrderStatus[];
+  productId?: string;
 
   @ApiPropertyOptional({ description: 'Filter by minimum total amount' })
   @IsOptional()
@@ -42,24 +31,21 @@ export class FilterOrderDto {
   @IsNumber()
   maxTotal?: number;
 
-  @ApiPropertyOptional({ description: 'Search in order notes' })
+  @ApiPropertyOptional({ description: 'Filter by minimum items count' })
   @IsOptional()
-  @IsString()
-  notesSearch?: string;
+  @IsNumber()
+  minItemsCount?: number;
+
+  @ApiPropertyOptional({ description: 'Filter by maximum items count' })
+  @IsOptional()
+  @IsNumber()
+  maxItemsCount?: number;
 }
 
-export class SortOrderDto {
+export class SortCartDto {
   @ApiProperty({
     description: 'Field to sort by',
-    enum: [
-      'id',
-      'userId',
-      'cartId',
-      'total',
-      'status',
-      'createdAt',
-      'updatedAt',
-    ],
+    enum: ['id', 'userId', 'total', 'createdAt', 'updatedAt'],
   })
   @IsString()
   field: string;
@@ -72,7 +58,7 @@ export class SortOrderDto {
   order: 'ASC' | 'DESC';
 }
 
-export class QueryOrderDto {
+export class QueryCartDto {
   @ApiPropertyOptional()
   @Transform(({ value }) => (value ? Number(value) : 1))
   @IsNumber()
@@ -88,23 +74,23 @@ export class QueryOrderDto {
   @ApiPropertyOptional({ type: String })
   @IsOptional()
   @Transform(({ value }) =>
-    value ? plainToInstance(FilterOrderDto, JSON.parse(value)) : undefined,
+    value ? plainToInstance(FilterCartDto, JSON.parse(value)) : undefined,
   )
   @ValidateNested()
-  @Type(() => FilterOrderDto)
-  filters?: FilterOrderDto | null;
+  @Type(() => FilterCartDto)
+  filters?: FilterCartDto | null;
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()
   @Transform(({ value }) => {
-    return value ? plainToInstance(SortOrderDto, JSON.parse(value)) : undefined;
+    return value ? plainToInstance(SortCartDto, JSON.parse(value)) : undefined;
   })
   @ValidateNested({ each: true })
-  @Type(() => SortOrderDto)
-  sort?: SortOrderDto[] | null;
+  @Type(() => SortCartDto)
+  sort?: SortCartDto[] | null;
 }
 
-export class QueryMyOrderDto {
+export class QueryMyCartDto {
   @ApiPropertyOptional({
     description: 'Page number for pagination',
     example: 1,
@@ -125,31 +111,17 @@ export class QueryMyOrderDto {
   @IsNumber()
   @IsOptional()
   limit?: number;
+}
 
-  @ApiPropertyOptional({
-    type: String,
-    description:
-      'Filter options as JSON string (userId will be automatically set)',
-    example: '{"statuses":["pending","confirmed"],"minTotal":50000}',
-  })
-  @IsOptional()
-  @Transform(({ value }) =>
-    value ? plainToInstance(FilterOrderDto, JSON.parse(value)) : undefined,
-  )
-  @ValidateNested()
-  @Type(() => FilterOrderDto)
-  filters?: Omit<FilterOrderDto, 'userId'> | null;
+export class MyCartPaginationResponseDto {
+  @ApiProperty({ type: Cart })
+  cart: Cart;
 
-  @ApiPropertyOptional({
-    type: String,
-    description: 'Sort options as JSON array string',
-    example: '[{"field":"createdAt","order":"DESC"}]',
-  })
-  @IsOptional()
-  @Transform(({ value }) => {
-    return value ? plainToInstance(SortOrderDto, JSON.parse(value)) : undefined;
-  })
-  @ValidateNested({ each: true })
-  @Type(() => SortOrderDto)
-  sort?: SortOrderDto[] | null;
+  @ApiProperty({ description: 'Whether there are more items available' })
+  @IsBoolean()
+  hasNextPage: boolean;
+
+  @ApiProperty({ description: 'Total number of items in cart' })
+  @IsNumber()
+  totalItems: number;
 }

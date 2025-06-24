@@ -12,12 +12,9 @@ const infrastructurePersistenceModule = (databaseConfig() as DatabaseConfig)
   : DocumentPaymentPersistenceModule;
 
 @Module({
-  imports: [
-    infrastructurePersistenceModule,
-    forwardRef(() => OrderModule),
-  ],
+  imports: [infrastructurePersistenceModule, forwardRef(() => OrderModule)],
   providers: [PaymentService],
   controllers: [PaymentController],
   exports: [PaymentService, infrastructurePersistenceModule],
 })
-export class PaymentModule { }
+export class PaymentModule {}

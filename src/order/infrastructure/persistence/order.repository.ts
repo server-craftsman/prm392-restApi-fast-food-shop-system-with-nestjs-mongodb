@@ -1,4 +1,6 @@
 import { Order } from '../../domain/order';
+import { FilterOrderDto, SortOrderDto } from '../../dto/query-order.dto';
+import { IPaginationOptions } from '../../../utils/types/pagination-options';
 
 /**
  * Abstract repository for Order domain operations
@@ -41,6 +43,21 @@ export abstract class OrderRepository {
    * @returns Promise<Order[]> - List of all orders
    */
   abstract findAll(): Promise<Order[]>;
+
+  /**
+   * Find orders with pagination, filtering, and sorting
+   * @param options - Pagination, filtering, and sorting options
+   * @returns Promise<Order[]> - Paginated list of orders
+   */
+  abstract findManyWithPagination({
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    filterOptions?: FilterOrderDto | null;
+    sortOptions?: SortOrderDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }): Promise<Order[]>;
 
   /**
    * Find order by ID

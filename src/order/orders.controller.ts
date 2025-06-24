@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { OrderService } from './orders.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -16,7 +17,7 @@ import {
   ApiTags,
   ApiOperation,
   ApiCreatedResponse,
-  ApiOkResponse,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { RolesGuard } from '../roles/roles.guard';
 import { Roles } from '../roles/roles.decorator';
@@ -24,10 +25,16 @@ import { RoleEnum } from '../roles/roles.enum';
 import { Order } from './domain/order';
 import { CreateCustomOrderDto } from './dto/create-custom-order.dto';
 import { CreateCustomOrderFromCartDto } from './dto/create-custom-order-from-cart.dto';
+import { QueryOrderDto, QueryMyOrderDto } from './dto/query-order.dto';
+// format pagination
+import {
+  InfinityPaginationResponse,
+  InfinityPaginationResponseDto,
+} from '../utils/dto/infinity-pagination-response.dto';
+import { infinityPagination } from '../utils/infinity-pagination';
 
 // import { CreateOrderDto } from './dto/create-order.dto';
 // import { UpdateOrderDto } from './dto/update-order.dto';
-// import { QueryOrderDto } from './dto/query-order.dto';
 
 @ApiTags('Orders')
 @ApiBearerAuth()
@@ -40,21 +47,73 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all orders (Admin only)' })
-  @ApiOkResponse({
-    description: 'The orders have been successfully retrieved.',
-    type: [Order],
+  @ApiOperation({
+    summary: 'Get orders with pagination and filters (Admin only)',
+    description:
+      'Retrieve orders with pagination, filtering, and sorting options',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Filtered & sorted & paginated list of orders',
+    type: InfinityPaginationResponse(Order),
   })
   @UseGuards(RolesGuard)
   @Roles(RoleEnum.admin)
-  findAll(): Promise<Order[]> {
-    return this.orderService.findAll();
+  async getOrdersWithPagination(
+    @Query() query: QueryOrderDto,
+  ): Promise<InfinityPaginationResponseDto<Order>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+
+    const orders = await this.orderService.findManyWithPagination({
+      filterOptions: query.filters,
+      sortOptions: query.sort,
+      paginationOptions: {
+        page,
+        limit,
+      },
+    });
+
+    return infinityPagination(orders, { page, limit });
   }
 
+  // @Get('me')
+  // @ApiOperation({ summary: 'Get all orders for the current user' })
+  // myOrders(@Req() req): Promise<Order[]> {
+  //   return this.orderService.myOrders(req.user.id);
+  // }
+
   @Get('me')
-  @ApiOperation({ summary: 'Get all orders for the current user' })
-  myOrders(@Req() req): Promise<Order[]> {
-    return this.orderService.myOrders(req.user.id);
+  @ApiOperation({
+    summary: 'Get orders for current user filtered & sorted & paginated',
+    description: 'Retrieve user orders filtered & sorted & paginated',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Filtered & sorted & paginated list of user orders',
+    type: InfinityPaginationResponse(Order),
+  })
+  async getMyOrdersWithPagination(
+    @Req() req,
+    @Query() query: QueryMyOrderDto,
+  ): Promise<InfinityPaginationResponseDto<Order>> {
+    const page = query.page ?? 1;
+    let limit = query.limit ?? 10;
+    if (limit > 50) {
+      limit = 50;
+    }
+
+    const orders = await this.orderService.myOrdersWithPagination({
+      userId: req.user.id,
+      filterOptions: query.filters,
+      sortOptions: query.sort,
+      paginationOptions: {
+        page,
+        limit,
+      },
+    });
+
+    return infinityPagination(orders, { page, limit });
   }
 
   @Get(':id')

@@ -27,7 +27,7 @@ export class CategoryDocumentRepository implements CategoryRepository {
   }
 
   async findManyWithPagination({
-    // filterOptions,
+    filterOptions,
     sortOptions,
     paginationOptions,
   }: {
@@ -36,31 +36,51 @@ export class CategoryDocumentRepository implements CategoryRepository {
     paginationOptions: IPaginationOptions;
   }): Promise<Category[]> {
     const where: FilterQuery<CategorySchemaClass> = {};
+
+    // Apply filters
+    if (filterOptions?.name) {
+      where['name'] = { $regex: filterOptions.name, $options: 'i' };
+    }
+
+    if (filterOptions?.createdAt) {
+      const date = new Date(filterOptions.createdAt);
+      // Filter for the entire day
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+      where['createdAt'] = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    if (filterOptions?.updatedAt) {
+      const date = new Date(filterOptions.updatedAt);
+      // Filter for the entire day
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+      where['updatedAt'] = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    // Build sort object
+    const sortObject: Record<string, 1 | -1> = {};
+    if (sortOptions?.length) {
+      sortOptions.forEach((sortOption) => {
+        const field = sortOption.field === 'id' ? '_id' : sortOption.field;
+        const order = sortOption.order.toUpperCase() === 'ASC' ? 1 : -1;
+        sortObject[field] = order;
+      });
+    } else {
+      // Default sort by createdAt descending
+      sortObject['createdAt'] = -1;
+    }
+
     const categoryObjects = await this.categoryModel
       .find(where)
-      .sort(
-        (sortOptions ?? []).reduce(
-          (accumulator, sortOption) => {
-            const field =
-              (sortOption?.field ?? 'createdAt') === 'id'
-                ? '_id'
-                : (sortOption?.field ?? 'createdAt');
-            const order =
-              (sortOption?.order ?? 'DESC').toString().toUpperCase() === 'ASC'
-                ? 1
-                : -1;
-            return { ...accumulator, [field]: order };
-          },
-          {} as Record<string, 1 | -1>,
-        ) || { createdAt: -1 },
-      )
+      .sort(sortObject)
       .select('-__v')
       .lean()
       .skip((paginationOptions.page - 1) * paginationOptions.limit)
       .limit(paginationOptions.limit);
 
-    return categoryObjects.map((userObject) =>
-      CategoryMapper.toDomain(userObject),
+    return categoryObjects.map((categoryObject) =>
+      CategoryMapper.toDomain(categoryObject),
     );
   }
 

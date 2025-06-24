@@ -5,17 +5,17 @@ import { PaymentRepository } from '../payment.repository';
 import { PaymentsDocumentRepository } from './repositories/payments.repository';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: PaymentSchemaClass.name, schema: PaymentSchema },
-        ]),
-    ],
-    providers: [
-        {
-            provide: PaymentRepository,
-            useClass: PaymentsDocumentRepository,
-        },
-    ],
-    exports: [PaymentRepository],
+  imports: [
+    MongooseModule.forFeature([
+      { name: PaymentSchemaClass.name, schema: PaymentSchema },
+    ]),
+  ],
+  providers: [
+    {
+      provide: PaymentRepository,
+      useClass: PaymentsDocumentRepository,
+    },
+  ],
+  exports: [PaymentRepository],
 })
-export class DocumentPaymentPersistenceModule { }
+export class DocumentPaymentPersistenceModule {}

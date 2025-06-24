@@ -7,48 +7,48 @@ import { EntityDocumentHelper } from '../../../../../utils/document-entity-helpe
 export type PaymentSchemaDocument = HydratedDocument<PaymentSchemaClass>;
 
 @Schema({
-    timestamps: true,
-    toJSON: {
-        virtuals: true,
-        getters: true,
-    },
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    getters: true,
+  },
 })
 export class PaymentSchemaClass extends EntityDocumentHelper {
-    @Prop({ type: Types.ObjectId, ref: COLLECTION_PATH.ORDER, required: true })
-    orderId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: COLLECTION_PATH.ORDER, required: true })
+  orderId: Types.ObjectId;
 
-    @Prop({ type: Types.ObjectId, ref: COLLECTION_PATH.USER, required: true })
-    userId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: COLLECTION_PATH.USER, required: true })
+  userId: Types.ObjectId;
 
-    @Prop({ required: true, min: 0 })
-    amount: number;
+  @Prop({ required: true, min: 0 })
+  amount: number;
 
-    @Prop({ required: true, enum: PaymentMethod })
-    paymentMethod: PaymentMethod;
+  @Prop({ required: true, enum: PaymentMethod })
+  paymentMethod: PaymentMethod;
 
-    @Prop({ required: true, unique: true })
-    transactionId: string;
+  @Prop({ required: true, unique: true })
+  transactionId: string;
 
-    @Prop({ required: true, enum: PaymentStatus, default: PaymentStatus.PENDING })
-    status: PaymentStatus;
+  @Prop({ required: true, enum: PaymentStatus, default: PaymentStatus.PENDING })
+  status: PaymentStatus;
 
-    @Prop({ required: false })
-    paymentUrl?: string;
+  @Prop({ required: false })
+  paymentUrl?: string;
 
-    @Prop({ required: false })
-    zaloPayOrderId?: string;
+  @Prop({ required: false })
+  zaloPayOrderId?: string;
 
-    @Prop({ required: false })
-    description?: string;
+  @Prop({ required: false })
+  description?: string;
 
-    @Prop({ default: Date.now })
-    createdAt: Date;
+  @Prop({ default: Date.now })
+  createdAt: Date;
 
-    @Prop({ default: Date.now })
-    updatedAt: Date;
+  @Prop({ default: Date.now })
+  updatedAt: Date;
 
-    @Prop()
-    deletedAt: Date;
+  @Prop()
+  deletedAt: Date;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(PaymentSchemaClass);
@@ -57,4 +57,4 @@ export const PaymentSchema = SchemaFactory.createForClass(PaymentSchemaClass);
 PaymentSchema.index({ orderId: 1 });
 PaymentSchema.index({ userId: 1 });
 PaymentSchema.index({ status: 1 });
-PaymentSchema.index({ transactionId: 1 }); 
+PaymentSchema.index({ transactionId: 1 });

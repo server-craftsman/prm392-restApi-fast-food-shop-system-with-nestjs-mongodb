@@ -12,9 +12,10 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateCustomOrderDto } from './dto/create-custom-order.dto';
 import { CreateCustomOrderFromCartDto } from './dto/create-custom-order-from-cart.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-// import { QueryOrderDto } from './dto/query-order.dto';
+import { FilterOrderDto, SortOrderDto } from './dto/query-order.dto';
 import { OrderItems } from './domain/order';
 import { OrderStatus } from './order-status.enum';
+import { IPaginationOptions } from '../utils/types/pagination-options';
 
 @Injectable()
 export class OrderService {
@@ -30,8 +31,48 @@ export class OrderService {
     return this.orderRepository.findAll();
   }
 
+  async findManyWithPagination({
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    filterOptions?: FilterOrderDto | null;
+    sortOptions?: SortOrderDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }): Promise<Order[]> {
+    return this.orderRepository.findManyWithPagination({
+      filterOptions,
+      sortOptions,
+      paginationOptions,
+    });
+  }
+
   async myOrders(userId: string): Promise<Order[]> {
     return this.orderRepository.findByUserId(userId);
+  }
+
+  async myOrdersWithPagination({
+    userId,
+    filterOptions,
+    sortOptions,
+    paginationOptions,
+  }: {
+    userId: string;
+    filterOptions?: FilterOrderDto | null;
+    sortOptions?: SortOrderDto[] | null;
+    paginationOptions: IPaginationOptions;
+  }): Promise<Order[]> {
+    // Set userId filter to ensure only user's orders are returned
+    const userFilterOptions = {
+      ...filterOptions,
+      userId,
+    };
+
+    return this.orderRepository.findManyWithPagination({
+      filterOptions: userFilterOptions,
+      sortOptions,
+      paginationOptions,
+    });
   }
 
   async findOne(id: string): Promise<Order> {
