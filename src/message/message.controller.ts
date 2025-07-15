@@ -10,11 +10,7 @@ import {
 } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { Message } from './domain/message.schema';
-import {
-  CreateMessageDto,
-  UpdateMessageDto,
-  QueryMessageDto,
-} from './dto';
+import { CreateMessageDto, UpdateMessageDto, QueryMessageDto } from './dto';
 import {
   ApiTags,
   ApiOperation,
@@ -31,7 +27,7 @@ import {
   version: '1',
 })
 export class MessageController {
-  constructor(private readonly messageService: MessageService) { }
+  constructor(private readonly messageService: MessageService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all messages with filtering and pagination' })

@@ -12,7 +12,7 @@ export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly filesService: FilesService,
-  ) { }
+  ) {}
 
   async findManyWithPagination({
     filterOptions,
@@ -39,11 +39,14 @@ export class ProductService {
   async create(data: CreateProductDto) {
     // Handle image IDs by fetching the actual file data
     if (data.images && data.images.length > 0) {
-      const imageIds = data.images.map(img => img.id);
+      const imageIds = data.images.map((img) => img.id);
       const files = await this.filesService.findByIds(imageIds);
 
       // Replace the image IDs with actual file objects
-      const productData: Omit<Product, 'id' | 'createdAt' | 'deletedAt' | 'updatedAt'> = {
+      const productData: Omit<
+        Product,
+        'id' | 'createdAt' | 'deletedAt' | 'updatedAt'
+      > = {
         ...data,
         images: files,
       };
@@ -51,7 +54,10 @@ export class ProductService {
       return this.productRepository.create(productData);
     }
 
-    const productData: Omit<Product, 'id' | 'createdAt' | 'deletedAt' | 'updatedAt'> = {
+    const productData: Omit<
+      Product,
+      'id' | 'createdAt' | 'deletedAt' | 'updatedAt'
+    > = {
       ...data,
       images: [],
     };
@@ -62,7 +68,7 @@ export class ProductService {
   async update(id: string, data: UpdateProductDto) {
     // Handle image IDs by fetching the actual file data
     if (data.images && data.images.length > 0) {
-      const imageIds = data.images.map(img => img.id);
+      const imageIds = data.images.map((img) => img.id);
       const files = await this.filesService.findByIds(imageIds);
 
       // Replace the image IDs with actual file objects

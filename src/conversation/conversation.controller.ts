@@ -23,7 +23,6 @@ import {
   ApiParam,
   ApiBody,
   ApiNoContentResponse,
-  ApiQuery,
 } from '@nestjs/swagger';
 
 @ApiTags('Conversations')
@@ -32,10 +31,12 @@ import {
   version: '1',
 })
 export class ConversationController {
-  constructor(private readonly conversationService: ConversationService) { }
+  constructor(private readonly conversationService: ConversationService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all conversations with filtering and pagination' })
+  @ApiOperation({
+    summary: 'Get all conversations with filtering and pagination',
+  })
   @ApiOkResponse({ description: 'List of conversations', type: [Conversation] })
   findAll(@Query() query: QueryConversationDto): Promise<Conversation[]> {
     return this.conversationService.findAll(query);
@@ -52,7 +53,10 @@ export class ConversationController {
   @Post()
   @ApiOperation({ summary: 'Create conversation' })
   @ApiBody({ description: 'Conversation payload', type: CreateConversationDto })
-  @ApiCreatedResponse({ description: 'Conversation created', type: Conversation })
+  @ApiCreatedResponse({
+    description: 'Conversation created',
+    type: Conversation,
+  })
   create(@Body() data: CreateConversationDto): Promise<Conversation> {
     return this.conversationService.create(data);
   }

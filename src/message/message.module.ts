@@ -15,4 +15,4 @@ import { ConversationModule } from '../conversation/conversation.module';
   controllers: [MessageController],
   exports: [MessageService, ChatGateway],
 })
-export class MessageModule { }
+export class MessageModule {}

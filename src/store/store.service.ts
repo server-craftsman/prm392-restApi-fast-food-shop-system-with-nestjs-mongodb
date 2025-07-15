@@ -1,16 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Store } from './domain/store.schema';
-import {
-  CreateStoreDto,
-  UpdateStoreDto,
-  QueryStoreDto,
-} from './dto';
+import { CreateStoreDto, UpdateStoreDto, QueryStoreDto } from './dto';
 
 @Injectable()
 export class StoreService {
-  constructor(@InjectModel(Store.name) private storeModel: Model<Store>) { }
+  constructor(@InjectModel(Store.name) private storeModel: Model<Store>) {}
 
   async findAll(query: QueryStoreDto = {}): Promise<Store[]> {
     const filter: any = {};
@@ -56,7 +56,11 @@ export class StoreService {
     }
 
     // Add distance field for sorting
-    if (query.sortBy === 'distance' && query.nearLatitude && query.nearLongitude) {
+    if (
+      query.sortBy === 'distance' &&
+      query.nearLatitude &&
+      query.nearLongitude
+    ) {
       // Distance already calculated in $geoNear
     } else {
       // Regular sorting
@@ -118,25 +122,27 @@ export class StoreService {
     radius: number = 10,
     limit: number = 20,
   ): Promise<Store[]> {
-    return this.storeModel.aggregate([
-      {
-        $geoNear: {
-          near: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
+    return this.storeModel
+      .aggregate([
+        {
+          $geoNear: {
+            near: {
+              type: 'Point',
+              coordinates: [longitude, latitude],
+            },
+            distanceField: 'distance',
+            maxDistance: radius * 1000, // Convert km to meters
+            spherical: true,
           },
-          distanceField: 'distance',
-          maxDistance: radius * 1000, // Convert km to meters
-          spherical: true,
         },
-      },
-      { $limit: limit },
-      {
-        $addFields: {
-          distanceKm: { $round: [{ $divide: ['$distance', 1000] }, 2] },
+        { $limit: limit },
+        {
+          $addFields: {
+            distanceKm: { $round: [{ $divide: ['$distance', 1000] }, 2] },
+          },
         },
-      },
-    ]).exec();
+      ])
+      .exec();
   }
 
   async getStoresByDistance(
@@ -144,23 +150,25 @@ export class StoreService {
     longitude: number,
     maxDistance: number = 50,
   ): Promise<Store[]> {
-    return this.storeModel.aggregate([
-      {
-        $geoNear: {
-          near: {
-            type: 'Point',
-            coordinates: [longitude, latitude],
+    return this.storeModel
+      .aggregate([
+        {
+          $geoNear: {
+            near: {
+              type: 'Point',
+              coordinates: [longitude, latitude],
+            },
+            distanceField: 'distance',
+            maxDistance: maxDistance * 1000,
+            spherical: true,
           },
-          distanceField: 'distance',
-          maxDistance: maxDistance * 1000,
-          spherical: true,
         },
-      },
-      {
-        $addFields: {
-          distanceKm: { $round: [{ $divide: ['$distance', 1000] }, 2] },
+        {
+          $addFields: {
+            distanceKm: { $round: [{ $divide: ['$distance', 1000] }, 2] },
+          },
         },
-      },
-    ]).exec();
+      ])
+      .exec();
   }
 }

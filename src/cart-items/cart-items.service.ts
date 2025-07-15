@@ -7,7 +7,7 @@ import { IPaginationOptions } from '../utils/types/pagination-options';
 
 @Injectable()
 export class CartItemsService {
-  constructor(private readonly cartRepository: CartRepository) { }
+  constructor(private readonly cartRepository: CartRepository) {}
 
   async findAll() {
     return this.cartRepository.findAll();

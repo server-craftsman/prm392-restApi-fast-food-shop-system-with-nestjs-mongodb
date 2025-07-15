@@ -40,14 +40,14 @@ import { StoreModule } from './store/store.module';
 const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
   .isDocumentDatabase
   ? MongooseModule.forRootAsync({
-    useClass: MongooseConfigService,
-  })
+      useClass: MongooseConfigService,
+    })
   : TypeOrmModule.forRootAsync({
-    useClass: TypeOrmConfigService,
-    dataSourceFactory: async (options: DataSourceOptions) => {
-      return new DataSource(options).initialize();
-    },
-  });
+      useClass: TypeOrmConfigService,
+      dataSourceFactory: async (options: DataSourceOptions) => {
+        return new DataSource(options).initialize();
+      },
+    });
 // </database-block>
 
 @Module({
@@ -107,7 +107,7 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
     SessionModule,
     MailModule,
     MailerModule,
-    HomeModule
+    HomeModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -13,7 +13,7 @@ export class ConversationService {
   constructor(
     @InjectModel(Conversation.name)
     private conversationModel: Model<Conversation>,
-  ) { }
+  ) {}
 
   async findAll(query: QueryConversationDto = {}): Promise<Conversation[]> {
     const filter: any = {};

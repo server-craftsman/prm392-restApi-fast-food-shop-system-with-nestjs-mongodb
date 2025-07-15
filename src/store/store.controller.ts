@@ -11,11 +11,7 @@ import {
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { Store } from './domain/store.schema';
-import {
-  CreateStoreDto,
-  UpdateStoreDto,
-  QueryStoreDto,
-} from './dto';
+import { CreateStoreDto, UpdateStoreDto, QueryStoreDto } from './dto';
 import {
   ApiTags,
   ApiOperation,
@@ -32,10 +28,12 @@ import {
   version: '1',
 })
 export class StoreController {
-  constructor(private readonly storeService: StoreService) { }
+  constructor(private readonly storeService: StoreService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all stores with filtering, pagination and location search' })
+  @ApiOperation({
+    summary: 'Get all stores with filtering, pagination and location search',
+  })
   @ApiOkResponse({ description: 'List of stores', type: [Store] })
   findAll(@Query() query: QueryStoreDto): Promise<Store[]> {
     return this.storeService.findAll(query);
@@ -43,8 +41,16 @@ export class StoreController {
 
   @Get('nearby/:latitude/:longitude')
   @ApiOperation({ summary: 'Find stores near a location' })
-  @ApiParam({ name: 'latitude', description: 'Latitude coordinate', example: '10.7769' })
-  @ApiParam({ name: 'longitude', description: 'Longitude coordinate', example: '106.7009' })
+  @ApiParam({
+    name: 'latitude',
+    description: 'Latitude coordinate',
+    example: '10.7769',
+  })
+  @ApiParam({
+    name: 'longitude',
+    description: 'Longitude coordinate',
+    example: '106.7009',
+  })
   @ApiOkResponse({ description: 'Nearby stores', type: [Store] })
   findNearby(
     @Param('latitude') latitude: string,
@@ -57,7 +63,9 @@ export class StoreController {
 
     // Validate coordinates
     if (isNaN(lat) || isNaN(lng)) {
-      throw new BadRequestException('Invalid latitude or longitude coordinates');
+      throw new BadRequestException(
+        'Invalid latitude or longitude coordinates',
+      );
     }
 
     if (lat < -90 || lat > 90) {

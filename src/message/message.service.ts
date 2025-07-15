@@ -2,17 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Message } from './domain/message.schema';
-import {
-  CreateMessageDto,
-  UpdateMessageDto,
-  QueryMessageDto,
-} from './dto';
+import { CreateMessageDto, UpdateMessageDto, QueryMessageDto } from './dto';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<Message>,
-  ) { }
+  ) {}
 
   async findAll(query: QueryMessageDto = {}): Promise<Message[]> {
     const filter: any = {};
@@ -79,7 +75,9 @@ export class MessageService {
   async update(id: string, data: UpdateMessageDto): Promise<Message> {
     const updateData: any = { ...data };
     if (data.conversationId) {
-      updateData.conversationId = new Types.ObjectId(data.conversationId as string);
+      updateData.conversationId = new Types.ObjectId(
+        data.conversationId as string,
+      );
     }
 
     const updated = await this.messageModel
@@ -96,7 +94,10 @@ export class MessageService {
   }
 
   // Additional methods for chat functionality
-  async findByConversationId(conversationId: string, limit: number = 50): Promise<Message[]> {
+  async findByConversationId(
+    conversationId: string,
+    limit: number = 50,
+  ): Promise<Message[]> {
     return this.messageModel
       .find({ conversationId: new Types.ObjectId(conversationId) })
       .sort({ timestamp: -1 })
