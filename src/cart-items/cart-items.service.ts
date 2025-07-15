@@ -7,7 +7,7 @@ import { IPaginationOptions } from '../utils/types/pagination-options';
 
 @Injectable()
 export class CartItemsService {
-  constructor(private readonly cartRepository: CartRepository) {}
+  constructor(private readonly cartRepository: CartRepository) { }
 
   async findAll() {
     return this.cartRepository.findAll();
@@ -128,5 +128,14 @@ export class CartItemsService {
   async clearCart(userId: string) {
     await this.cartRepository.clear(userId);
     return this.getCart(userId);
+  }
+
+  /**
+   * Get total quantity of items in user's cart
+   */
+  async countItems(userId: string): Promise<number> {
+    const cart = await this.cartRepository.findByUserId(userId);
+    if (!cart || !cart.items) return 0;
+    return cart.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
   }
 }

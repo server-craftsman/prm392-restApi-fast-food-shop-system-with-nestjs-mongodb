@@ -5,10 +5,14 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FilterProductDto, SortProductDto } from './dto/query-product.dto';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { Product } from './domain/product';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly filesService: FilesService,
+  ) { }
 
   async findManyWithPagination({
     filterOptions,
@@ -33,10 +37,45 @@ export class ProductService {
   }
 
   async create(data: CreateProductDto) {
-    return this.productRepository.create(data);
+    // Handle image IDs by fetching the actual file data
+    if (data.images && data.images.length > 0) {
+      const imageIds = data.images.map(img => img.id);
+      const files = await this.filesService.findByIds(imageIds);
+
+      // Replace the image IDs with actual file objects
+      const productData: Omit<Product, 'id' | 'createdAt' | 'deletedAt' | 'updatedAt'> = {
+        ...data,
+        images: files,
+      };
+
+      return this.productRepository.create(productData);
+    }
+
+    const productData: Omit<Product, 'id' | 'createdAt' | 'deletedAt' | 'updatedAt'> = {
+      ...data,
+      images: [],
+    };
+
+    return this.productRepository.create(productData);
   }
 
   async update(id: string, data: UpdateProductDto) {
+    // Handle image IDs by fetching the actual file data
+    if (data.images && data.images.length > 0) {
+      const imageIds = data.images.map(img => img.id);
+      const files = await this.filesService.findByIds(imageIds);
+
+      // Replace the image IDs with actual file objects
+      const productData = {
+        ...data,
+        images: files,
+      };
+
+      const updated = await this.productRepository.update(id, productData);
+      if (!updated) throw new NotFoundException('Product not found');
+      return updated;
+    }
+
     const updated = await this.productRepository.update(id, data);
     if (!updated) throw new NotFoundException('Product not found');
     return updated;

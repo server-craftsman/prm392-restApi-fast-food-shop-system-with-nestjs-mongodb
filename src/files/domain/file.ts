@@ -23,6 +23,11 @@ export class FileType {
   })
   @Transform(
     ({ value }) => {
+      // If value is already a full URL, return it as is
+      if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
+        return value;
+      }
+
       if ((fileConfig() as FileConfig).driver === FileDriver.LOCAL) {
         return (appConfig() as AppConfig).backendDomain + value;
       } else if (

@@ -32,19 +32,22 @@ import { ProductsModule } from './products/products.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrderModule } from './order/orders.module';
 import { PaymentModule } from './payment/payment.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { MessageModule } from './message/message.module';
+import { StoreModule } from './store/store.module';
 
 // <database-block>
 const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
   .isDocumentDatabase
   ? MongooseModule.forRootAsync({
-      useClass: MongooseConfigService,
-    })
+    useClass: MongooseConfigService,
+  })
   : TypeOrmModule.forRootAsync({
-      useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        return new DataSource(options).initialize();
-      },
-    });
+    useClass: TypeOrmConfigService,
+    dataSourceFactory: async (options: DataSourceOptions) => {
+      return new DataSource(options).initialize();
+    },
+  });
 // </database-block>
 
 @Module({
@@ -87,6 +90,9 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
+    StoreModule,
+    ConversationModule,
+    MessageModule,
     PaymentModule,
     OrderModule,
     CartItemsModule,
@@ -101,7 +107,7 @@ const infrastructureDatabaseModule = (databaseConfig() as DatabaseConfig)
     SessionModule,
     MailModule,
     MailerModule,
-    HomeModule,
+    HomeModule
   ],
 })
-export class AppModule {}
+export class AppModule { }

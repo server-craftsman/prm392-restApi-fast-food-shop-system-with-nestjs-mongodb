@@ -7,7 +7,16 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class ImageDto {
+  @ApiProperty({ example: 'cbcfa8b8-3a25-4adb-a9c6-e325f0d0f3ae' })
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+}
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Bánh tráng trộn mắm tôm' })
@@ -38,15 +47,17 @@ export class CreateProductDto {
   categoryId: string;
 
   @ApiPropertyOptional({
-    type: [Object],
+    type: [ImageDto],
     example: [
-      { id: '', path: '' },
-      { id: '', path: '' },
+      { id: 'cbcfa8b8-3a25-4adb-a9c6-e325f0d0f3ae' },
+      { id: 'd409e0a26b6a824a46d6f7b8c9d0e1f2' },
     ],
   })
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
   @IsOptional()
-  images?: any[];
+  images?: ImageDto[];
 
   @ApiPropertyOptional({ example: 'Oreo' })
   @IsString()

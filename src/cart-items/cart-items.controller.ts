@@ -43,7 +43,7 @@ import { InfinityPaginationResponseDto } from '../utils/dto/infinity-pagination-
   version: '1',
 })
 export class CartItemsController {
-  constructor(private readonly cartItemsService: CartItemsService) {}
+  constructor(private readonly cartItemsService: CartItemsService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all carts (Admin only)' })
@@ -110,6 +110,15 @@ export class CartItemsController {
         limit,
       },
     });
+  }
+
+  @Get('me/count')
+  @ApiOperation({ summary: 'Get total quantity of items in my cart' })
+  @ApiOkResponse({ description: 'Total quantity of items', schema: { type: 'number', example: 5 } })
+  @HttpCode(HttpStatus.OK)
+  async getMyCartItemCount(@Request() req): Promise<{ count: number }> {
+    const count = await this.cartItemsService.countItems(req.user.id);
+    return { count };
   }
 
   @Get(':id')
